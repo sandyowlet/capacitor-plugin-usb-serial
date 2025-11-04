@@ -54,7 +54,7 @@ public class UsbSerialPlugin extends Plugin implements Callback {
                 settings.stopBits = call.getInt("stopBits");
 
             if (call.hasOption("parity"))
-                settings.parity = call.getInt("parity");
+                settings.parity = convertParityStringToInt(call.getString("parity"));
 
             if (call.hasOption("dtr"))
                 settings.dtr = call.getBoolean("dtr");
@@ -163,5 +163,25 @@ public class UsbSerialPlugin extends Plugin implements Callback {
         JSObject ret = new JSObject();
         ret.put("error", error.toString());
         notifyListeners("error", ret);
+    }
+
+    private int convertParityStringToInt(String parityStr) {
+        if (parityStr == null)
+            return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_NONE;
+
+        switch (parityStr.toLowerCase()) {
+            case "none":
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_NONE;
+            case "odd":
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_ODD;
+            case "even":
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_EVEN;
+            case "mark":
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_MARK;
+            case "space":
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_SPACE;
+            default:
+                return com.hoho.android.usbserial.driver.UsbSerialPort.PARITY_NONE;
+        }
     }
 }

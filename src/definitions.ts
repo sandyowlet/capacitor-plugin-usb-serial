@@ -6,7 +6,7 @@ export interface UsbSerialOptions {
   baudRate?: number;
   dataBits?: number;
   stopBits?: number;
-  parity?: number;
+  parity?: 'none' | 'odd' | 'even' | 'mark' | 'space';
   dtr?: boolean;
   rts?: boolean;
 }
