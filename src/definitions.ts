@@ -138,4 +138,11 @@ export interface UsbSerialPlugin {
     eventName: 'error',
     listenerFunc: (data: { error: string }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
+
+  /**
+   * Remove all listeners for all events.
+   *
+   * @returns Promise that resolves when all listeners are removed
+   */
+  removeAllListeners(): Promise<void>;
 }
