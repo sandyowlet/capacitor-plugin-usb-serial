@@ -13,6 +13,8 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.nio.charset.StandardCharsets;
+
 //import com.google.common.util.concurrent.RateLimiter;
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
 import com.hoho.android.usbserial.driver.Ch34xSerialDriver;
@@ -214,8 +216,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
         try {
             byte[] buffer = new byte[8192];
             int len = usbSerialPort.read(buffer, READ_WAIT_MILLIS);
-//            str.concat("\n");
-            return HexDump.toHexString(Arrays.copyOf(buffer, len));
+            return new String(Arrays.copyOf(buffer, len), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // when using read with timeout, USB bulkTransfer returns -1 on timeout _and_ errors
             // like connection loss, so there is typically no exception thrown here on error
@@ -232,7 +233,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
             throw new Error("can't send empty string to device", new Throwable("EMPTY_STRING"));
         }
         try {
-            byte[] data = (str + "\r\n").getBytes();
+            byte[] data = str.getBytes("UTF-8");
             usbSerialPort.write(data, WRITE_WAIT_MILLIS);
         } catch (Exception e) {
             closeSerial();
@@ -260,7 +261,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     private void updateReceivedData(byte[] data) {
         try {
             // fix: trigger callback when new data is received, not waiting for line breaks
-            String receivedData = new String(data);
+            String receivedData = new String(data, StandardCharsets.UTF_8);
             callback.receivedData(receivedData);
         } catch (Exception exception) {
             updateReadDataError(exception);
