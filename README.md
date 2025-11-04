@@ -24,6 +24,7 @@ npx cap sync
 * [`addListener('detached', ...)`](#addlistenerdetached-)
 * [`addListener('data', ...)`](#addlistenerdata-)
 * [`addListener('error', ...)`](#addlistenererror-)
+* [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 
 </docgen-index>
@@ -34,10 +35,12 @@ npx cap sync
 ### connectedDevices()
 
 ```typescript
-connectedDevices() => Promise<{ devices: []; }>
+connectedDevices() => Promise<UsbSerialDevice[]>
 ```
 
-**Returns:** <code>Promise&lt;{ devices: []; }&gt;</code>
+Get a list of currently connected USB serial devices.
+
+**Returns:** <code>Promise&lt;UsbSerialDevice[]&gt;</code>
 
 --------------------
 
@@ -48,9 +51,11 @@ connectedDevices() => Promise<{ devices: []; }>
 openSerial(options: UsbSerialOptions) => Promise<void>
 ```
 
-| Param         | Type                                                          |
-| ------------- | ------------------------------------------------------------- |
-| **`options`** | <code><a href="#usbserialoptions">UsbSerialOptions</a></code> |
+Open a serial connection to a USB device.
+
+| Param         | Type                                                          | Description                 |
+| ------------- | ------------------------------------------------------------- | --------------------------- |
+| **`options`** | <code><a href="#usbserialoptions">UsbSerialOptions</a></code> | - Serial connection options |
 
 --------------------
 
@@ -61,6 +66,8 @@ openSerial(options: UsbSerialOptions) => Promise<void>
 closeSerial() => Promise<void>
 ```
 
+Close the current serial connection.
+
 --------------------
 
 
@@ -69,6 +76,8 @@ closeSerial() => Promise<void>
 ```typescript
 readSerial() => Promise<{ data: string; }>
 ```
+
+Reads data from the serial port.
 
 **Returns:** <code>Promise&lt;{ data: string; }&gt;</code>
 
@@ -81,9 +90,11 @@ readSerial() => Promise<{ data: string; }>
 writeSerial(options: { data: string; }) => Promise<void>
 ```
 
-| Param         | Type                           |
-| ------------- | ------------------------------ |
-| **`options`** | <code>{ data: string; }</code> |
+Writes data to the serial port.
+
+| Param         | Type                           | Description         |
+| ------------- | ------------------------------ | ------------------- |
+| **`options`** | <code>{ data: string; }</code> | - The write options |
 
 --------------------
 
@@ -94,10 +105,12 @@ writeSerial(options: { data: string; }) => Promise<void>
 addListener(eventName: 'log', listenerFunc: (data: { text: string; tag: string; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                                           |
-| ------------------ | -------------------------------------------------------------- |
-| **`eventName`**    | <code>'log'</code>                                             |
-| **`listenerFunc`** | <code>(data: { text: string; tag: string; }) =&gt; void</code> |
+Listen for log messages from the plugin.
+
+| Param              | Type                                                           | Description                                               |
+| ------------------ | -------------------------------------------------------------- | --------------------------------------------------------- |
+| **`eventName`**    | <code>'log'</code>                                             | - Must be 'log'                                           |
+| **`listenerFunc`** | <code>(data: { text: string; tag: string; }) =&gt; void</code> | - Callback function called when log messages are received |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -110,10 +123,12 @@ addListener(eventName: 'log', listenerFunc: (data: { text: string; tag: string; 
 addListener(eventName: 'connected', listenerFunc: (data: UsbSerialDevice) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                                                           |
-| ------------------ | ------------------------------------------------------------------------------ |
-| **`eventName`**    | <code>'connected'</code>                                                       |
-| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> |
+Listen for device connection events.
+
+| Param              | Type                                                                           | Description                                       |
+| ------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| **`eventName`**    | <code>'connected'</code>                                                       | - Must be 'connected'                             |
+| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> | - Callback function called when a device connects |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -126,10 +141,12 @@ addListener(eventName: 'connected', listenerFunc: (data: UsbSerialDevice) => voi
 addListener(eventName: 'attached', listenerFunc: (data: UsbSerialDevice) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                                                           |
-| ------------------ | ------------------------------------------------------------------------------ |
-| **`eventName`**    | <code>'attached'</code>                                                        |
-| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> |
+Listen for device attachment events.
+
+| Param              | Type                                                                           | Description                                          |
+| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| **`eventName`**    | <code>'attached'</code>                                                        | - Must be 'attached'                                 |
+| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> | - Callback function called when a device is attached |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -142,10 +159,12 @@ addListener(eventName: 'attached', listenerFunc: (data: UsbSerialDevice) => void
 addListener(eventName: 'detached', listenerFunc: (data: UsbSerialDevice) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                                                           |
-| ------------------ | ------------------------------------------------------------------------------ |
-| **`eventName`**    | <code>'detached'</code>                                                        |
-| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> |
+Listen for device detachment events.
+
+| Param              | Type                                                                           | Description                                          |
+| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| **`eventName`**    | <code>'detached'</code>                                                        | - Must be 'detached'                                 |
+| **`listenerFunc`** | <code>(data: <a href="#usbserialdevice">UsbSerialDevice</a>) =&gt; void</code> | - Callback function called when a device is detached |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -158,10 +177,12 @@ addListener(eventName: 'detached', listenerFunc: (data: UsbSerialDevice) => void
 addListener(eventName: 'data', listenerFunc: (data: { data: string; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                              |
-| ------------------ | ------------------------------------------------- |
-| **`eventName`**    | <code>'data'</code>                               |
-| **`listenerFunc`** | <code>(data: { data: string; }) =&gt; void</code> |
+Listen for incoming serial data.
+
+| Param              | Type                                              | Description                                      |
+| ------------------ | ------------------------------------------------- | ------------------------------------------------ |
+| **`eventName`**    | <code>'data'</code>                               | - Must be 'data'                                 |
+| **`listenerFunc`** | <code>(data: { data: string; }) =&gt; void</code> | - Callback function called when data is received |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -174,12 +195,25 @@ addListener(eventName: 'data', listenerFunc: (data: { data: string; }) => void) 
 addListener(eventName: 'error', listenerFunc: (data: { error: string; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                               |
-| ------------------ | -------------------------------------------------- |
-| **`eventName`**    | <code>'error'</code>                               |
-| **`listenerFunc`** | <code>(data: { error: string; }) =&gt; void</code> |
+Listen for error events from the serial communication.
+
+| Param              | Type                                               | Description                                  |
+| ------------------ | -------------------------------------------------- | -------------------------------------------- |
+| **`eventName`**    | <code>'error'</code>                               | - Must be 'error'                            |
+| **`listenerFunc`** | <code>(data: { error: string; }) =&gt; void</code> | - Callback function called when errors occur |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
+
+Remove all listeners for all events.
 
 --------------------
 
@@ -187,18 +221,30 @@ addListener(eventName: 'error', listenerFunc: (data: { error: string; }) => void
 ### Interfaces
 
 
+#### UsbSerialDevice
+
+| Prop                   | Type                |
+| ---------------------- | ------------------- |
+| **`deviceId`**         | <code>number</code> |
+| **`vendorId`**         | <code>number</code> |
+| **`productId`**        | <code>number</code> |
+| **`deviceName`**       | <code>string</code> |
+| **`manufacturerName`** | <code>string</code> |
+| **`serialNumber`**     | <code>string</code> |
+
+
 #### UsbSerialOptions
 
-| Prop           | Type                 |
-| -------------- | -------------------- |
-| **`deviceId`** | <code>number</code>  |
-| **`portNum`**  | <code>number</code>  |
-| **`baudRate`** | <code>number</code>  |
-| **`dataBits`** | <code>number</code>  |
-| **`stopBits`** | <code>number</code>  |
-| **`parity`**   | <code>number</code>  |
-| **`dtr`**      | <code>boolean</code> |
-| **`rts`**      | <code>boolean</code> |
+| Prop           | Type                                                        |
+| -------------- | ----------------------------------------------------------- |
+| **`deviceId`** | <code>number</code>                                         |
+| **`portNum`**  | <code>number</code>                                         |
+| **`baudRate`** | <code>number</code>                                         |
+| **`dataBits`** | <code>number</code>                                         |
+| **`stopBits`** | <code>number</code>                                         |
+| **`parity`**   | <code>'none' \| 'odd' \| 'even' \| 'mark' \| 'space'</code> |
+| **`dtr`**      | <code>boolean</code>                                        |
+| **`rts`**      | <code>boolean</code>                                        |
 
 
 #### PluginListenerHandle
@@ -206,14 +252,5 @@ addListener(eventName: 'error', listenerFunc: (data: { error: string; }) => void
 | Prop         | Type                                      |
 | ------------ | ----------------------------------------- |
 | **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
-
-
-#### UsbSerialDevice
-
-| Prop      | Type                |
-| --------- | ------------------- |
-| **`pid`** | <code>number</code> |
-| **`vid`** | <code>number</code> |
-| **`did`** | <code>number</code> |
 
 </docgen-api>
