@@ -2,7 +2,7 @@ import { PluginListenerHandle } from '@capacitor/core';
 
 export interface UsbSerialOptions {
   deviceId: number;
-  portNum: number;
+  portNum?: number;
   baudRate?: number;
   dataBits?: number;
   stopBits?: number;
