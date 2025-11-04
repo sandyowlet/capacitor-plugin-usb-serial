@@ -68,7 +68,6 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     UsbDevice connectedDevice;
     // USB permission broadcastreceiver
     private final Handler mainLooper;
-    String messageNMEA = "";
 
 
 //    private RateLimiter throttle = RateLimiter.create(1.0);
@@ -260,25 +259,9 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
 
     private void updateReceivedData(byte[] data) {
         try {
-            messageNMEA += new String(data);
-
-            while (messageNMEA.indexOf(0x0a) != -1) {
-
-                int eol = messageNMEA.indexOf(0x0a);
-                if (-1 != eol) {
-                    String sentence = messageNMEA.substring(0, eol + 1);
-                    messageNMEA = messageNMEA.substring(eol + 1);
-
-                    // Boolean allowed = throttle.tryAcquire();
-                    // if (!allowed) {
-                    // return;
-                    // }
-
-                    callback.receivedData(sentence);
-                } else if (messageNMEA.length() > 128) {
-                    throw new Exception("invalid NMEA string");
-                }
-            }
+            // fix: trigger callback when new data is received, not waiting for line breaks
+            String receivedData = new String(data);
+            callback.receivedData(receivedData);
         } catch (Exception exception) {
             updateReadDataError(exception);
         }
