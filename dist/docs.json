@@ -7,12 +7,19 @@
     "methods": [
       {
         "name": "connectedDevices",
-        "signature": "() => Promise<{ devices: []; }>",
+        "signature": "() => Promise<UsbSerialDevice[]>",
         "parameters": [],
-        "returns": "Promise<{ devices: []; }>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [],
+        "returns": "Promise<UsbSerialDevice[]>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise resolving to an array of connected USB serial devices"
+          }
+        ],
+        "docs": "Get a list of currently connected USB serial devices.",
+        "complexTypes": [
+          "UsbSerialDevice"
+        ],
         "slug": "connecteddevices"
       },
       {
@@ -21,13 +28,22 @@
         "parameters": [
           {
             "name": "options",
-            "docs": "",
+            "docs": "- Serial connection options",
             "type": "UsbSerialOptions"
           }
         ],
         "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options - Serial connection options"
+          },
+          {
+            "name": "returns",
+            "text": "Promise that resolves when the connection is established"
+          }
+        ],
+        "docs": "Open a serial connection to a USB device.",
         "complexTypes": [
           "UsbSerialOptions"
         ],
@@ -38,8 +54,13 @@
         "signature": "() => Promise<void>",
         "parameters": [],
         "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise that resolves when the connection is closed"
+          }
+        ],
+        "docs": "Close the current serial connection.",
         "complexTypes": [],
         "slug": "closeserial"
       },
@@ -48,8 +69,17 @@
         "signature": "() => Promise<{ data: string; }>",
         "parameters": [],
         "returns": "Promise<{ data: string; }>",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise resolving to an object containing the received data"
+          },
+          {
+            "name": "returns",
+            "text": ".data - The received data as a UTF-8 decoded string"
+          }
+        ],
+        "docs": "Reads data from the serial port.",
         "complexTypes": [],
         "slug": "readserial"
       },
@@ -59,13 +89,22 @@
         "parameters": [
           {
             "name": "options",
-            "docs": "",
+            "docs": "- The write options",
             "type": "{ data: string; }"
           }
         ],
         "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options - The write options"
+          },
+          {
+            "name": "param",
+            "text": "options.data - The data to write as a UTF-8 encoded string that will be converted to bytes"
+          }
+        ],
+        "docs": "Writes data to the serial port.",
         "complexTypes": [],
         "slug": "writeserial"
       },
@@ -75,18 +114,43 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'log'",
             "type": "'log'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when log messages are received",
             "type": "(data: { text: string; tag: string; }) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'log'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when log messages are received"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - Object containing the log data"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data.text - The log message text"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data.tag - The log tag/category"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for log messages from the plugin.",
         "complexTypes": [
           "PluginListenerHandle"
         ],
@@ -98,18 +162,35 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'connected'",
             "type": "'connected'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when a device connects",
             "type": "(data: UsbSerialDevice) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'connected'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when a device connects"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - The connected device information"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for device connection events.",
         "complexTypes": [
           "PluginListenerHandle",
           "UsbSerialDevice"
@@ -122,18 +203,35 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'attached'",
             "type": "'attached'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when a device is attached",
             "type": "(data: UsbSerialDevice) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'attached'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when a device is attached"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - The attached device information"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for device attachment events.",
         "complexTypes": [
           "PluginListenerHandle",
           "UsbSerialDevice"
@@ -146,18 +244,35 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'detached'",
             "type": "'detached'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when a device is detached",
             "type": "(data: UsbSerialDevice) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'detached'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when a device is detached"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - The detached device information"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for device detachment events.",
         "complexTypes": [
           "PluginListenerHandle",
           "UsbSerialDevice"
@@ -170,18 +285,39 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'data'",
             "type": "'data'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when data is received",
             "type": "(data: { data: string; }) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'data'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when data is received"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - Object containing the received data"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data.data - The received data as a UTF-8 decoded string"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for incoming serial data.",
         "complexTypes": [
           "PluginListenerHandle"
         ],
@@ -193,27 +329,114 @@
         "parameters": [
           {
             "name": "eventName",
-            "docs": "",
+            "docs": "- Must be 'error'",
             "type": "'error'"
           },
           {
             "name": "listenerFunc",
-            "docs": "",
+            "docs": "- Callback function called when errors occur",
             "type": "(data: { error: string; }) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName - Must be 'error'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - Callback function called when errors occur"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data - Object containing the error information"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc.data.error - The error message"
+          },
+          {
+            "name": "returns",
+            "text": "Promise resolving to a listener handle for removing the listener"
+          }
+        ],
+        "docs": "Listen for error events from the serial communication.",
         "complexTypes": [
           "PluginListenerHandle"
         ],
         "slug": "addlistenererror-"
+      },
+      {
+        "name": "removeAllListeners",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "Promise that resolves when all listeners are removed"
+          }
+        ],
+        "docs": "Remove all listeners for all events.",
+        "complexTypes": [],
+        "slug": "removealllisteners"
       }
     ],
     "properties": []
   },
   "interfaces": [
+    {
+      "name": "UsbSerialDevice",
+      "slug": "usbserialdevice",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "deviceId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "vendorId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "productId",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        },
+        {
+          "name": "deviceName",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "manufacturerName",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "serialNumber",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
     {
       "name": "UsbSerialOptions",
       "slug": "usbserialoptions",
@@ -233,7 +456,7 @@
           "tags": [],
           "docs": "",
           "complexTypes": [],
-          "type": "number"
+          "type": "number | undefined"
         },
         {
           "name": "baudRate",
@@ -261,7 +484,7 @@
           "tags": [],
           "docs": "",
           "complexTypes": [],
-          "type": "number | undefined"
+          "type": "'none' | 'odd' | 'even' | 'mark' | 'space' | undefined"
         },
         {
           "name": "dtr",
@@ -292,36 +515,6 @@
           "docs": "",
           "complexTypes": [],
           "type": "() => Promise<void>"
-        }
-      ]
-    },
-    {
-      "name": "UsbSerialDevice",
-      "slug": "usbserialdevice",
-      "docs": "",
-      "tags": [],
-      "methods": [],
-      "properties": [
-        {
-          "name": "pid",
-          "tags": [],
-          "docs": "",
-          "complexTypes": [],
-          "type": "number"
-        },
-        {
-          "name": "vid",
-          "tags": [],
-          "docs": "",
-          "complexTypes": [],
-          "type": "number"
-        },
-        {
-          "name": "did",
-          "tags": [],
-          "docs": "",
-          "complexTypes": [],
-          "type": "number"
         }
       ]
     }
