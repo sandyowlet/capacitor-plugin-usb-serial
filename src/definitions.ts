@@ -12,13 +12,16 @@ export interface UsbSerialOptions {
 }
 
 export interface UsbSerialDevice {
-  pid: number;
-  vid: number;
-  did: number;
+  deviceId: number;
+  vendorId: number;
+  productId: number;
+  deviceName: string;
+  manufacturerName?: string;
+  serialNumber?: string;
 }
 
 export interface UsbSerialPlugin {
-  connectedDevices(): Promise<{ devices: [] }>;
+  connectedDevices(): Promise<UsbSerialDevice[]>;
   openSerial(options: UsbSerialOptions): Promise<void>;
   closeSerial(): Promise<void>;
   readSerial(): Promise<{ data: string }>;

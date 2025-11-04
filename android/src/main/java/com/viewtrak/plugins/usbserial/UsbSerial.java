@@ -406,6 +406,6 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
                 listItems.add(new DeviceItem(device, 0, getDriverClass(device)));
             }
         }
-        return  Utils.deviceListToJsonConvert(listItems);
+        return Utils.deviceListToJsonConvert(listItems, usbManager);
     }
 }

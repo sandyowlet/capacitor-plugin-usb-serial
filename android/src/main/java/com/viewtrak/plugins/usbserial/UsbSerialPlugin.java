@@ -1,6 +1,7 @@
 package com.viewtrak.plugins.usbserial;
 
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -134,24 +135,20 @@ public class UsbSerialPlugin extends Plugin implements Callback {
 
     @Override
     public void usbDeviceAttached(UsbDevice device) {
-        JSObject ret = new JSObject();
         if (device != null) {
-            ret.put("pid", device.getProductId());
-            ret.put("vid", device.getVendorId());
-            ret.put("did", device.getDeviceId());
+            UsbManager usbManager = (UsbManager) getContext().getSystemService(android.content.Context.USB_SERVICE);
+            JSObject ret = Utils.createDeviceInfoObject(device, usbManager);
+            notifyListeners("attached", ret);
         }
-        notifyListeners("attached", ret);
     }
 
     @Override
     public void usbDeviceDetached(UsbDevice device) {
-        JSObject ret = new JSObject();
         if (device != null) {
-            ret.put("pid", device.getProductId());
-            ret.put("vid", device.getVendorId());
-            ret.put("did", device.getDeviceId());
+            UsbManager usbManager = (UsbManager) getContext().getSystemService(android.content.Context.USB_SERVICE);
+            JSObject ret = Utils.createDeviceInfoObject(device, usbManager);
+            notifyListeners("detached", ret);
         }
-        notifyListeners("detached", ret);
     }
 
     @Override

@@ -1,7 +1,12 @@
 package com.viewtrak.plugins.usbserial;
 
+import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
+import android.os.Build;
+import android.util.Log;
 
+import com.getcapacitor.JSObject;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 
 import org.json.JSONArray;
@@ -24,29 +29,43 @@ public class Utils {
         }
     }
 
-    public static JSONArray deviceListToJsonConvert(List<DeviceItem> list) {
-
-        JSONArray jsonArray = new JSONArray();// /ItemDetail jsonArray
+    public static JSONArray deviceListToJsonConvert(List<DeviceItem> list, UsbManager usbManager) {
+        JSONArray jsonArray = new JSONArray();
 
         for (int i = 0; i < list.size(); i++) {
-            JSONObject jsonObject = new JSONObject();// /sub Object
+            JSObject deviceObj = createDeviceInfoObject(list.get(i).device, usbManager);
+            jsonArray.put(deviceObj);
+        }
+        return jsonArray;
+    }
 
+    public static JSObject createDeviceInfoObject(UsbDevice device, UsbManager usbManager) {
+        JSObject deviceObj = new JSObject();
+
+        deviceObj.put("deviceId", device.getDeviceId());
+        deviceObj.put("vendorId", device.getVendorId());
+        deviceObj.put("productId", device.getProductId());
+        deviceObj.put("deviceName", device.getDeviceName());
+
+        // Only access privileged properties if we have permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
-                JSONObject device = new JSONObject();
-                device.put("productId", list.get(i).device.getProductId());
-                device.put("productName", list.get(i).device.getProductName());
-                device.put("vendorId", list.get(i).device.getVendorId());
-                device.put("deviceId", list.get(i).device.getDeviceId());
-                jsonObject.put("device", device);
-                jsonObject.put("port", list.get(i).port);
-                jsonObject.put("driver", list.get(i).driver);
-
-                jsonArray.put(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                if (usbManager.hasPermission(device)) {
+                    deviceObj.put("manufacturerName", device.getManufacturerName());
+                    deviceObj.put("serialNumber", device.getSerialNumber());
+                } else {
+                    deviceObj.put("manufacturerName", null);
+                    deviceObj.put("serialNumber", null);
+                }
+            } catch (SecurityException e) {
+                Log.w("UsbSerial",
+                        "Cannot access device properties without permission for device " + device.getDeviceId(), e);
+                deviceObj.put("manufacturerName", null);
+                deviceObj.put("serialNumber", null);
             }
         }
-        return  jsonArray;
+
+        return deviceObj;
     }
 
 }
