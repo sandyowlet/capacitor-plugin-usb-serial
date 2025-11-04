@@ -26,26 +26,26 @@ export interface UsbSerialPlugin {
 
   addListener(
     eventName: 'log',
-    listenerFunc: (data: { text: string; tag: string }) => void
+    listenerFunc: (data: { text: string; tag: string }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'connected',
-    listenerFunc: (data: UsbSerialDevice) => void
+    listenerFunc: (data: UsbSerialDevice) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'attached',
-    listenerFunc: (data: UsbSerialDevice) => void
+    listenerFunc: (data: UsbSerialDevice) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'detached',
-    listenerFunc: (data: UsbSerialDevice) => void
+    listenerFunc: (data: UsbSerialDevice) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'data',
-    listenerFunc: (data: { data: string }) => void
+    listenerFunc: (data: { data: string }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'error',
-    listenerFunc: (data: { error: string }) => void
+    listenerFunc: (data: { error: string }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
 }
