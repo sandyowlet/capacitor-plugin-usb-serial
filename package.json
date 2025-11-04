@@ -18,10 +18,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CoooWeee/capacitor-plugin-usb-serial.git"
+    "url": "git+https://github.com/sandyowlet/capacitor-plugin-usb-serial.git"
   },
   "bugs": {
-    "url": "https://github.com/CoooWeee/capacitor-plugin-usb-serial/issues"
+    "url": "https://github.com/sandyowlet/capacitor-plugin-usb-serial/issues"
   },
   "keywords": [
     "capacitor",
