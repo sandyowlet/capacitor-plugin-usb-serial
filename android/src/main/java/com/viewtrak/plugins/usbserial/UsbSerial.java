@@ -141,71 +141,134 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
         usbSerialPort = null;
     }
 
+    private UsbDevice findDeviceById(int deviceId) {
+        UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        for (UsbDevice device : usbManager.getDeviceList().values()) {
+            if (device.getDeviceId() == deviceId) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    private void requestUsbPermission(UsbDevice device, UsbSerialOptions settings) {
+        if (usbPermission == UsbPermission.Requested) {
+            return;
+        }
+
+        usbPermission = UsbPermission.Requested;
+
+        try {
+            UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+            PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                new Intent(USB_PERMISSION),
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            BroadcastReceiver permissionReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (USB_PERMISSION.equals(action)) {
+                        boolean granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
+                        usbPermission = granted ? UsbPermission.Granted : UsbPermission.Denied;
+
+                        context.unregisterReceiver(this);
+
+                        if (granted) {
+                            openSerial(settings);
+                        } else {
+                            callback.error(new Error("USB permission denied by user",
+                                           new Throwable("PERMISSION_DENIED")));
+                        }
+                    }
+                }
+            };
+
+            context.registerReceiver(permissionReceiver,
+                                   new IntentFilter(USB_PERMISSION),
+                                   RECEIVER_EXPORTED);
+
+            usbManager.requestPermission(device, usbPermissionIntent);
+
+        } catch (Exception e) {
+            usbPermission = UsbPermission.Denied;
+            callback.error(new Error("Failed to request USB permission: " + e.getMessage(), e));
+        }
+    }
+
+    private void establishConnection(UsbSerialOptions settings, UsbSerialDriver driver) throws IOException {
+        UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+
+        UsbDeviceConnection usbConnection = usbManager.openDevice(driver.getDevice());
+        if (usbConnection == null) {
+            throw new Error("connection failed: Serial open failed",
+                          new Throwable("connectionFailed:SerialOpenFailed"));
+        }
+
+        usbSerialPort.open(usbConnection);
+        usbSerialPort.setParameters(settings.baudRate, settings.dataBits, settings.stopBits, settings.parity);
+
+        if (settings.dtr) usbSerialPort.setDTR(true);
+        if (settings.rts) usbSerialPort.setRTS(true);
+
+        usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
+        usbIoManager.start();
+
+        setConnectedDevice(driver.getDevice());
+    }
+
+    private void handleSecurityException(SecurityException e) {
+        closeSerial();
+        usbPermission = UsbPermission.Denied;
+        callback.error(new Error("Security exception: " + e.getMessage(), e));
+    }
+
+    private void handleConnectionException(Exception e) {
+        closeSerial();
+        callback.error(new Error("Connection failed: " + e.getMessage(), e));
+    }
+
     public void openSerial(UsbSerialOptions settings) {
         try {
             closeSerial();
 
-            // Sleep On Pause defaults to true
-//            this.sleepOnPause = openSerialCall.hasOption("sleepOnPause") ? openSerialCall.getBoolean("sleepOnPause") : true;
-
-            UsbDevice device = null;
-            UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-            for (UsbDevice v : usbManager.getDeviceList().values()) {
-                if (v.getDeviceId() == settings.deviceId)
-                    device = v;
-            }
+            UsbDevice device = findDeviceById(settings.deviceId);
             if (device == null) {
-                throw new Error("connection failed: device not found", new Throwable("connectionFailed:DeviceNotFound"));
+                throw new Error("connection failed: device not found",
+                              new Throwable("connectionFailed:DeviceNotFound"));
             }
+
             UsbSerialDriver driver = getProper().probeDevice(device);
             if (driver == null) {
-                // tyring custom
                 driver = getDriverClass(device);
             }
             if (driver == null) {
-                throw new Error("connection failed: no driver for device", new Throwable("connectionFailed:NoDriverForDevice"));
+                throw new Error("connection failed: no driver for device",
+                              new Throwable("connectionFailed:NoDriverForDevice"));
             }
-            if (driver.getPorts().size() < settings.portNum) {
-                throw new Error("connection failed: not enough ports at device", new Throwable("connectionFailed:NoAvailablePorts"));
+
+            if (driver.getPorts().size() <= settings.portNum) {
+                throw new Error("connection failed: not enough ports at device",
+                              new Throwable("connectionFailed:NoAvailablePorts"));
             }
+
             usbSerialPort = driver.getPorts().get(settings.portNum);
-            UsbDeviceConnection usbConnection = usbManager.openDevice(driver.getDevice());
-            if (usbConnection == null && usbPermission == UsbPermission.Unknown && !usbManager.hasPermission(driver.getDevice())) {
-                usbPermission = UsbPermission.Requested;
-                PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(USB_PERMISSION), PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                context.registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String action = intent.getAction();
-                        if (USB_PERMISSION.equals(action)) {
-                            usbPermission = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
-                                    ? UsbPermission.Granted : UsbPermission.Denied;
-                            context.unregisterReceiver(this);
-                            openSerial(settings);
-                        }
-                    }
-                }, new IntentFilter(USB_PERMISSION), RECEIVER_EXPORTED);
-                usbManager.requestPermission(driver.getDevice(), usbPermissionIntent);
+
+            UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+            if (!usbManager.hasPermission(driver.getDevice())) {
+                requestUsbPermission(driver.getDevice(), settings);
                 return;
             }
-            if (usbConnection == null) {
-                if (!usbManager.hasPermission(driver.getDevice())) {
-                    throw new Error("connection failed: permission denied", new Throwable("connectionFailed:UsbConnectionPermissionDenied"));
-                } else {
-                    throw new Error("connection failed: Serial open failed", new Throwable("connectionFailed:SerialOpenFailed"));
-                }
-            }
-            usbSerialPort.open(usbConnection);
-            usbSerialPort.setParameters(settings.baudRate, settings.dataBits, settings.stopBits, settings.parity);
-            if (settings.dtr) usbSerialPort.setDTR(true);
-            if (settings.rts) usbSerialPort.setRTS(true);
-            usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
-            usbIoManager.start();
-//            connected = true;
-            setConnectedDevice(device);
+
+            establishConnection(settings, driver);
+
+        } catch (SecurityException e) {
+            handleSecurityException(e);
         } catch (Exception exception) {
-            closeSerial();
-            throw new Error(exception.getMessage(), exception.getCause());
+            handleConnectionException(exception);
         }
     }
 
