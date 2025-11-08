@@ -2,10 +2,12 @@
 
 This plugin can be used for reading data from other device over the usb channel
 
+> This project is forked from [capacitor-plugin-usb-serial](https://github.com/CoooWeee/capacitor-plugin-usb-serial.git)
+
 ## Install
 
 ```bash
-npm install git+https://github.com/sandyowlet/capacitor-plugin-usb-serial.git
+npm install capacitor-serial-plugin
 npx cap sync
 ```
 
@@ -39,7 +41,7 @@ In `capacitor.config.json`:
 In `capacitor.config.ts`:
 
 ```ts
-/// <reference types="usb-serial-plugin" />
+/// <reference types="capacitor-serial-plugin" />
 
 import { CapacitorConfig } from '@capacitor/cli';
 
