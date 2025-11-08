@@ -9,6 +9,49 @@ npm install git+https://github.com/sandyowlet/capacitor-plugin-usb-serial.git
 npx cap sync
 ```
 
+## Configuration
+
+<docgen-config>
+<!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
+
+| Prop               | Type                            | Description                                                                                                                               | Default             | Since |
+| ------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----- |
+| **`dataEncoding`** | <code>'utf8' \| 'base64'</code> | Encoding format for serial data. - 'utf8': Return data as UTF-8 decoded string (default) - 'base64': Return data as base64 encoded string | <code>'utf8'</code> | 1.0.0 |
+
+### Examples
+
+In `capacitor.config.json`:
+
+```json
+{
+  "plugins": {
+    "UsbSerial": {
+      "dataEncoding": "base64"
+    }
+  }
+}
+```
+
+In `capacitor.config.ts`:
+
+```ts
+/// <reference types="usb-serial-plugin" />
+
+import { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  plugins: {
+    UsbSerial: {
+      dataEncoding: "base64",
+    },
+  },
+};
+
+export default config;
+```
+
+</docgen-config>
+
 ## API
 
 <docgen-index>
