@@ -21,9 +21,12 @@ export interface UsbSerialPlugin {
     /**
      * Get a list of currently connected USB serial devices.
      *
-     * @returns Promise resolving to an array of connected USB serial devices
+     * @returns Promise resolving to an object containing the connected devices
+     * @returns.devices - An array of connected USB serial devices
      */
-    connectedDevices(): Promise<UsbSerialDevice[]>;
+    connectedDevices(): Promise<{
+        devices: UsbSerialDevice[];
+    }>;
     /**
      * Open a serial connection to a USB device.
      *

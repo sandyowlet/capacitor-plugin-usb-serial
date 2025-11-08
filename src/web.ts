@@ -3,7 +3,7 @@ import { WebPlugin } from '@capacitor/core';
 import type { UsbSerialDevice, UsbSerialOptions, UsbSerialPlugin } from './definitions';
 
 export class UsbSerialWeb extends WebPlugin implements UsbSerialPlugin {
-  connectedDevices(): Promise<UsbSerialDevice[]> {
+  connectedDevices(): Promise<{ devices: UsbSerialDevice[] }> {
     throw new Error('Method not implemented.');
   }
   openSerial(options: UsbSerialOptions): Promise<void> {

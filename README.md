@@ -35,12 +35,12 @@ npx cap sync
 ### connectedDevices()
 
 ```typescript
-connectedDevices() => Promise<UsbSerialDevice[]>
+connectedDevices() => Promise<{ devices: UsbSerialDevice[]; }>
 ```
 
 Get a list of currently connected USB serial devices.
 
-**Returns:** <code>Promise&lt;UsbSerialDevice[]&gt;</code>
+**Returns:** <code>Promise&lt;{ devices: UsbSerialDevice[]; }&gt;</code>
 
 --------------------
 
