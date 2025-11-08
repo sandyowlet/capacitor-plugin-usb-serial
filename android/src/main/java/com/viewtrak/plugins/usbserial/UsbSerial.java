@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 //import com.google.common.util.concurrent.RateLimiter;
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
@@ -42,6 +43,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     private final Context context;
     // call that will be used to send back usb device attached/detached event
     private final Callback callback;
+    private final UsbSerialConfig config;
 
     // activity reference from UsbSerialPlugin
 //    private AppCompatActivity mActivity;
@@ -74,10 +76,11 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
 
 //    private RateLimiter throttle = RateLimiter.create(1.0);
 
-    public UsbSerial(Context context, Callback callback) {
+public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         super();
         this.context = context;
         this.callback = callback;
+        this.config = config;
 
         mainLooper = new Handler(Looper.getMainLooper());
 
@@ -279,7 +282,13 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
         try {
             byte[] buffer = new byte[8192];
             int len = usbSerialPort.read(buffer, READ_WAIT_MILLIS);
-            return new String(Arrays.copyOf(buffer, len), StandardCharsets.UTF_8);
+            byte[] data = Arrays.copyOf(buffer, len);
+
+            if (config.useBase64Encoding) {
+                return Base64.getEncoder().encodeToString(data);
+            } else {
+                return new String(data, StandardCharsets.UTF_8);
+            }
         } catch (IOException e) {
             // when using read with timeout, USB bulkTransfer returns -1 on timeout _and_ errors
             // like connection loss, so there is typically no exception thrown here on error
@@ -324,7 +333,12 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     private void updateReceivedData(byte[] data) {
         try {
             // fix: trigger callback when new data is received, not waiting for line breaks
-            String receivedData = new String(data, StandardCharsets.UTF_8);
+            String receivedData;
+            if (config.useBase64Encoding) {
+                receivedData = Base64.getEncoder().encodeToString(data);
+            } else {
+                receivedData = new String(data, StandardCharsets.UTF_8);
+            }
             callback.receivedData(receivedData);
         } catch (Exception exception) {
             updateReadDataError(exception);

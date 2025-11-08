@@ -14,11 +14,16 @@ import org.json.JSONArray;
 @CapacitorPlugin(name = "UsbSerial")
 public class UsbSerialPlugin extends Plugin implements Callback {
     private UsbSerial implementation;
+    private UsbSerialConfig config;
 
     @Override
     public void load() {
         super.load();
-        implementation = new UsbSerial(getContext(), this);
+
+        config = new UsbSerialConfig();
+        config.useBase64Encoding = "base64".equals(getConfig().getString("dataEncoding", "utf8"));
+
+        implementation = new UsbSerial(getContext(), this, config);
     }
 
     @PluginMethod
