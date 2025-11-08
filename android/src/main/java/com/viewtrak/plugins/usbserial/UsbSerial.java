@@ -15,6 +15,13 @@ import android.os.Looper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.io.IOException;
+import java.lang.Error;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 //import com.google.common.util.concurrent.RateLimiter;
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
@@ -30,14 +37,6 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import com.viewtrak.plugins.usbserial.Utils.*;
 
 import org.json.JSONArray;
-
-import java.io.IOException;
-import java.lang.Error;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class UsbSerial implements SerialInputOutputManager.Listener {
     private final Context context;
@@ -73,8 +72,10 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     // USB permission broadcastreceiver
     private final Handler mainLooper;
 
-
-//    private RateLimiter throttle = RateLimiter.create(1.0);
+    private final byte[][] dataBuffer = new byte[1][];
+    private int dataBufferSize = 0;
+    private boolean isDataPending = false;
+    private Runnable flushDataRunnable;
 
 public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         super();
@@ -134,6 +135,8 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             usbIoManager.stop();
             usbIoManager = null;
         }
+        mainLooper.removeCallbacks(flushDataRunnable);
+        flushPendingData();
         usbPermission = UsbPermission.Unknown;
         try {
             if (usbSerialPort != null) {
@@ -332,16 +335,55 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
 
     private void updateReceivedData(byte[] data) {
         try {
-            // fix: trigger callback when new data is received, not waiting for line breaks
-            String receivedData;
-            if (config.useBase64Encoding) {
-                receivedData = Base64.getEncoder().encodeToString(data);
-            } else {
-                receivedData = new String(data, StandardCharsets.UTF_8);
+            synchronized (dataBuffer) {
+                if (dataBuffer[0] == null) {
+                    dataBuffer[0] = new byte[config.dataBufferSize];
+                }
+
+                int newSize = dataBufferSize + data.length;
+
+                if (newSize >= config.dataBufferSize) {
+                    flushPendingData();
+                    dataBuffer[0] = Arrays.copyOf(data, Math.min(data.length, config.dataBufferSize));
+                    dataBufferSize = Math.min(data.length, config.dataBufferSize);
+                } else {
+                    System.arraycopy(data, 0, dataBuffer[0], dataBufferSize, data.length);
+                    dataBufferSize = newSize;
+                }
+
+                if (!isDataPending) {
+                    isDataPending = true;
+                    if (flushDataRunnable == null) {
+                        flushDataRunnable = this::flushPendingData;
+                    }
+                    mainLooper.postDelayed(flushDataRunnable, config.dataThrottleMs);
+                } else {
+                    mainLooper.removeCallbacks(flushDataRunnable);
+                    mainLooper.postDelayed(flushDataRunnable, config.dataThrottleMs);
+                }
             }
-            callback.receivedData(receivedData);
         } catch (Exception exception) {
             updateReadDataError(exception);
+        }
+    }
+
+    private void flushPendingData() {
+        synchronized (dataBuffer) {
+            if (dataBufferSize > 0) {
+                try {
+                    String receivedData;
+                    if (config.useBase64Encoding) {
+                        receivedData = Base64.getEncoder().encodeToString(Arrays.copyOf(dataBuffer[0], dataBufferSize));
+                    } else {
+                        receivedData = new String(dataBuffer[0], 0, dataBufferSize, StandardCharsets.UTF_8);
+                    }
+                    callback.receivedData(receivedData);
+                } catch (Exception exception) {
+                    updateReadDataError(exception);
+                }
+            }
+            dataBufferSize = 0;
+            isDataPending = false;
         }
     }
 

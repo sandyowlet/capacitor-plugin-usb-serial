@@ -22,6 +22,8 @@ public class UsbSerialPlugin extends Plugin implements Callback {
 
         config = new UsbSerialConfig();
         config.useBase64Encoding = "base64".equals(getConfig().getString("dataEncoding", "utf8"));
+        config.dataThrottleMs = getConfig().getInt("dataThrottleMs", 50);
+        config.dataBufferSize = getConfig().getInt("dataBufferSize", 4096);
 
         implementation = new UsbSerial(getContext(), this, config);
     }
