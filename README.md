@@ -14,9 +14,11 @@ npx cap sync
 <docgen-config>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-| Prop               | Type                            | Description                                                                                                                               | Default             | Since |
-| ------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----- |
-| **`dataEncoding`** | <code>'utf8' \| 'base64'</code> | Encoding format for serial data. - 'utf8': Return data as UTF-8 decoded string (default) - 'base64': Return data as base64 encoded string | <code>'utf8'</code> | 1.0.0 |
+| Prop                 | Type                            | Description                                                                                                                                                                                                       | Default             | Since |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----- |
+| **`dataEncoding`**   | <code>'utf8' \| 'base64'</code> | Encoding format for serial data. - 'utf8': Return data as UTF-8 decoded string (default) - 'base64': Return data as base64 encoded string                                                                         | <code>'utf8'</code> | 1.0.0 |
+| **`dataThrottleMs`** | <code>number</code>             | Data throttle interval in milliseconds for aggregating received data. Multiple data packets received within this interval will be batched together. Helps improve performance when receiving high-frequency data. | <code>50</code>     | 1.0.0 |
+| **`dataBufferSize`** | <code>number</code>             | Maximum buffer size in bytes before flushing data. When the buffer reaches this size, data is sent immediately without waiting for throttle interval.                                                             | <code>4096</code>   | 1.0.0 |
 
 ### Examples
 
@@ -26,7 +28,9 @@ In `capacitor.config.json`:
 {
   "plugins": {
     "UsbSerial": {
-      "dataEncoding": "base64"
+      "dataEncoding": "base64",
+      "dataThrottleMs": 100,
+      "dataBufferSize": 8192
     }
   }
 }
@@ -43,6 +47,8 @@ const config: CapacitorConfig = {
   plugins: {
     UsbSerial: {
       dataEncoding: "base64",
+      dataThrottleMs: 100,
+      dataBufferSize: 8192,
     },
   },
 };
