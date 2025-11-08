@@ -80,7 +80,7 @@
           },
           {
             "name": "returns",
-            "text": ".data - The received data as a UTF-8 decoded string"
+            "text": ".data - The received data as a string (UTF-8 or base64 depending on dataEncoding configuration)"
           }
         ],
         "docs": "Reads data from the serial port.",
@@ -314,7 +314,7 @@
           },
           {
             "name": "param",
-            "text": "listenerFunc.data.data - The received data as a UTF-8 decoded string"
+            "text": "listenerFunc.data.data - The received data as a string (UTF-8 or base64 depending on dataEncoding configuration)"
           },
           {
             "name": "returns",
@@ -525,5 +525,33 @@
   ],
   "enums": [],
   "typeAliases": [],
-  "pluginConfigs": []
+  "pluginConfigs": [
+    {
+      "name": "UsbSerial",
+      "slug": "usbserial",
+      "properties": [
+        {
+          "name": "dataEncoding",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "'utf8'",
+              "name": "default"
+            },
+            {
+              "text": "\"base64\"",
+              "name": "example"
+            }
+          ],
+          "docs": "Encoding format for serial data.\r\n- 'utf8': Return data as UTF-8 decoded string (default)\r\n- 'base64': Return data as base64 encoded string",
+          "complexTypes": [],
+          "type": "'utf8' | 'base64' | undefined"
+        }
+      ],
+      "docs": ""
+    }
+  ]
 }

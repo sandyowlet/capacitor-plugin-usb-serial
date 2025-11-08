@@ -1,4 +1,20 @@
 import { PluginListenerHandle } from '@capacitor/core';
+declare module '@capacitor/cli' {
+    interface PluginsConfig {
+        UsbSerial?: {
+            /**
+             * Encoding format for serial data.
+             * - 'utf8': Return data as UTF-8 decoded string (default)
+             * - 'base64': Return data as base64 encoded string
+             *
+             * @since 1.0.0
+             * @default 'utf8'
+             * @example "base64"
+             */
+            dataEncoding?: 'utf8' | 'base64';
+        };
+    }
+}
 export interface UsbSerialOptions {
     deviceId: number;
     portNum?: number;
@@ -44,7 +60,7 @@ export interface UsbSerialPlugin {
      * Reads data from the serial port.
      *
      * @returns Promise resolving to an object containing the received data
-     * @returns.data - The received data as a UTF-8 decoded string
+     * @returns.data - The received data as a string (UTF-8 or base64 depending on dataEncoding configuration)
      */
     readSerial(): Promise<{
         data: string;
@@ -109,7 +125,7 @@ export interface UsbSerialPlugin {
      * @param eventName - Must be 'data'
      * @param listenerFunc - Callback function called when data is received
      * @param listenerFunc.data - Object containing the received data
-     * @param listenerFunc.data.data - The received data as a UTF-8 decoded string
+     * @param listenerFunc.data.data - The received data as a string (UTF-8 or base64 depending on dataEncoding configuration)
      *
      * @returns Promise resolving to a listener handle for removing the listener
      */
