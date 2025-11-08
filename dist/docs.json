@@ -549,6 +549,46 @@
           "docs": "Encoding format for serial data.\r\n- 'utf8': Return data as UTF-8 decoded string (default)\r\n- 'base64': Return data as base64 encoded string",
           "complexTypes": [],
           "type": "'utf8' | 'base64' | undefined"
+        },
+        {
+          "name": "dataThrottleMs",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "50",
+              "name": "default"
+            },
+            {
+              "text": "100",
+              "name": "example"
+            }
+          ],
+          "docs": "Data throttle interval in milliseconds for aggregating received data.\r\nMultiple data packets received within this interval will be batched together.\r\nHelps improve performance when receiving high-frequency data.",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "dataBufferSize",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "4096",
+              "name": "default"
+            },
+            {
+              "text": "8192",
+              "name": "example"
+            }
+          ],
+          "docs": "Maximum buffer size in bytes before flushing data.\r\nWhen the buffer reaches this size, data is sent immediately without waiting for throttle interval.",
+          "complexTypes": [],
+          "type": "number | undefined"
         }
       ],
       "docs": ""

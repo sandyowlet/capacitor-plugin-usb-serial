@@ -12,6 +12,25 @@ declare module '@capacitor/cli' {
              * @example "base64"
              */
             dataEncoding?: 'utf8' | 'base64';
+            /**
+             * Data throttle interval in milliseconds for aggregating received data.
+             * Multiple data packets received within this interval will be batched together.
+             * Helps improve performance when receiving high-frequency data.
+             *
+             * @since 1.0.0
+             * @default 50
+             * @example 100
+             */
+            dataThrottleMs?: number;
+            /**
+             * Maximum buffer size in bytes before flushing data.
+             * When the buffer reaches this size, data is sent immediately without waiting for throttle interval.
+             *
+             * @since 1.0.0
+             * @default 4096
+             * @example 8192
+             */
+            dataBufferSize?: number;
         };
     }
 }
