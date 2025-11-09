@@ -226,13 +226,12 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         }
     }
 
-    private void establishConnection(UsbSerialOptions settings, UsbSerialDriver driver) throws IOException {
+    private void establishConnection(UsbSerialOptions settings, UsbSerialDriver driver) throws IOException, Exception {
         UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 
         UsbDeviceConnection usbConnection = usbManager.openDevice(driver.getDevice());
         if (usbConnection == null) {
-            throw new Error("connection failed: Serial open failed",
-                          new Throwable("connectionFailed:SerialOpenFailed"));
+            throw new Exception("connection failed: Serial open failed");
         }
 
         usbSerialPort.open(usbConnection);
@@ -255,8 +254,7 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
 
             UsbDevice device = findDeviceById(settings.deviceId);
             if (device == null) {
-                throw new Error("connection failed: device not found",
-                              new Throwable("connectionFailed:DeviceNotFound"));
+                throw new Exception("connection failed: device not found");
             }
 
             UsbSerialDriver driver = getProper().probeDevice(device);
@@ -264,13 +262,11 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
                 driver = getDriverClass(device);
             }
             if (driver == null) {
-                throw new Error("connection failed: no driver for device",
-                              new Throwable("connectionFailed:NoDriverForDevice"));
+                throw new Exception("connection failed: no driver for device");
             }
 
             if (driver.getPorts().size() <= settings.portNum) {
-                throw new Error("connection failed: not enough ports at device",
-                              new Throwable("connectionFailed:NoAvailablePorts"));
+                throw new Exception("connection failed: not enough ports at device");
             }
 
             usbSerialPort = driver.getPorts().get(settings.portNum);
@@ -292,9 +288,9 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         }
     }
 
-    String readSerial() {
+    String readSerial() throws Exception {
         if (connectedDevice == null) {
-            throw new Error("not connected", new Throwable("NOT_CONNECTED"));
+            throw new Exception("not connected");
         }
         try {
             byte[] buffer = new byte[8192];
@@ -310,23 +306,23 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             // when using read with timeout, USB bulkTransfer returns -1 on timeout _and_ errors
             // like connection loss, so there is typically no exception thrown here on error
             closeSerial();
-            throw new Error("connection lost: " + e.getMessage(), e.getCause());
+            throw new Exception("connection lost: " + e.getMessage());
         }
     }
 
-    void writeSerial(String str) {
+    void writeSerial(String str) throws Exception {
         if (connectedDevice == null) {
-            throw new Error("not connected", new Throwable("NOT_CONNECTED"));
+            throw new Exception("not connected");
         }
         if (str.length() == 0) {
-            throw new Error("can't send empty string to device", new Throwable("EMPTY_STRING"));
+            throw new Exception("can't send empty string to device");
         }
         try {
             byte[] data = str.getBytes("UTF-8");
             usbSerialPort.write(data, WRITE_WAIT_MILLIS);
         } catch (Exception e) {
             closeSerial();
-            throw new Error("connection lost: " + e.getMessage(), e.getCause());
+            throw new Exception("connection lost: " + e.getMessage());
         }
     }
 
