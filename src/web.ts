@@ -18,6 +18,9 @@ export class UsbSerialWeb extends WebPlugin implements UsbSerialPlugin {
   writeSerial(options: { data: string }): Promise<void> {
     throw new Error('Method not implemented: ' + JSON.stringify(options));
   }
+  getDataEncoding(): Promise<{ encoding: 'utf8' | 'base64' }> {
+    throw new Error('Method not implemented.');
+  }
   addListener(
     eventName: 'log' | 'connected' | 'attached' | 'detached' | 'data' | 'error',
     listenerFunc: (data: any) => void,

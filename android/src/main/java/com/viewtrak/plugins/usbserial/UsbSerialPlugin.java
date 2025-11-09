@@ -109,6 +109,18 @@ public class UsbSerialPlugin extends Plugin implements Callback {
         }
     }
 
+    @PluginMethod
+    public void getDataEncoding(PluginCall call) {
+        try {
+            JSObject jsObject = new JSObject();
+            String encoding = config.useBase64Encoding ? "base64" : "utf8";
+            jsObject.put("encoding", encoding);
+            call.resolve(jsObject);
+        } catch (Exception e) {
+            call.reject(e.toString());
+        }
+    }
+
 //    @Override
 //    protected void handleOnResume() {
 //        super.handleOnResume();

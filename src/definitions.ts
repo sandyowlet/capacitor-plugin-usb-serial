@@ -179,6 +179,14 @@ export interface UsbSerialPlugin {
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
 
   /**
+   * Get the current data encoding configuration.
+   *
+   * @returns Promise resolving to an object containing the encoding format
+   * @returns.encoding - The data encoding format ('utf8' or 'base64')
+   */
+  getDataEncoding(): Promise<{ encoding: 'utf8' | 'base64' }>;
+
+  /**
    * Remove all listeners for all events.
    *
    * @returns Promise that resolves when all listeners are removed
