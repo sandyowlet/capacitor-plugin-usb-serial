@@ -13,6 +13,9 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.ArrayList;
@@ -158,20 +161,27 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         return null;
     }
 
-    private void requestUsbPermission(UsbDevice device, UsbSerialOptions settings) {
+    private void requestUsbPermission(UsbDevice device, UsbSerialOptions settings) throws Exception {
         if (usbPermission == UsbPermission.Requested) {
-            return;
+            throw new Exception("Permission request already in progress");
         }
 
         usbPermission = UsbPermission.Requested;
 
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Exception[] permissionException = { null };
+
         try {
             UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+
+            Intent intent = new Intent(USB_PERMISSION);
+            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+
             PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(
                 context,
                 0,
-                new Intent(USB_PERMISSION),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
             );
 
             BroadcastReceiver permissionReceiver = new BroadcastReceiver() {
@@ -179,17 +189,17 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
                 public void onReceive(Context context, Intent intent) {
                     String action = intent.getAction();
                     if (USB_PERMISSION.equals(action)) {
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                         boolean granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
                         usbPermission = granted ? UsbPermission.Granted : UsbPermission.Denied;
 
                         context.unregisterReceiver(this);
 
-                        if (granted) {
-                            openSerial(settings);
-                        } else {
-                            callback.error(new Error("USB permission denied by user",
-                                           new Throwable("PERMISSION_DENIED")));
+                        if (!granted) {
+                            permissionException[0] = new Exception("USB permission denied by user");
                         }
+
+                        latch.countDown();
                     }
                 }
             };
@@ -200,9 +210,19 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
 
             usbManager.requestPermission(device, usbPermissionIntent);
 
+            if (!latch.await(30, TimeUnit.SECONDS)) {
+                context.unregisterReceiver(permissionReceiver);
+                usbPermission = UsbPermission.Denied;
+                throw new Exception("Permission request timeout");
+            }
+
+            if (permissionException[0] != null) {
+                throw permissionException[0];
+            }
+
         } catch (Exception e) {
             usbPermission = UsbPermission.Denied;
-            callback.error(new Error("Failed to request USB permission: " + e.getMessage(), e));
+            throw e;
         }
     }
 
@@ -227,18 +247,9 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         setConnectedDevice(driver.getDevice());
     }
 
-    private void handleSecurityException(SecurityException e) {
-        closeSerial();
-        usbPermission = UsbPermission.Denied;
-        callback.error(new Error("Security exception: " + e.getMessage(), e));
-    }
 
-    private void handleConnectionException(Exception e) {
-        closeSerial();
-        callback.error(new Error("Connection failed: " + e.getMessage(), e));
-    }
 
-    public void openSerial(UsbSerialOptions settings) {
+    public void openSerial(UsbSerialOptions settings) throws Exception {
         try {
             closeSerial();
 
@@ -267,15 +278,17 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
             if (!usbManager.hasPermission(driver.getDevice())) {
                 requestUsbPermission(driver.getDevice(), settings);
-                return;
             }
 
             establishConnection(settings, driver);
 
         } catch (SecurityException e) {
-            handleSecurityException(e);
+            closeSerial();
+            usbPermission = UsbPermission.Denied;
+            throw e;
         } catch (Exception exception) {
-            handleConnectionException(exception);
+            closeSerial();
+            throw exception;
         }
     }
 
@@ -380,7 +393,7 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
     }
 
     private void flushInternalLocked() {
-                try {
+        try {
             if (buffer.size() == 0)
                 return;
             byte[] toSend = buffer.toByteArray();
@@ -395,11 +408,11 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
     private void sendEncodedAndCatch(byte[] raw) {
         try {
             String payload;
-                    if (config.useBase64Encoding) {
+            if (config.useBase64Encoding) {
                 payload = Base64.getEncoder().encodeToString(raw);
-                    } else {
+            } else {
                 payload = new String(raw, 0, raw.length, StandardCharsets.UTF_8);
-                    }
+            }
             callback.receivedData(payload);
         } catch (Exception e) {
             updateReadDataError(e);
@@ -408,7 +421,7 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
 
     private void updateReadDataError(Exception exception) {
         try {
-        callback.error(new Error(exception.getMessage(), exception.getCause()));
+            callback.error(new Error(exception.getMessage(), exception.getCause()));
         } catch (Throwable t) {
             t.printStackTrace();
         }
