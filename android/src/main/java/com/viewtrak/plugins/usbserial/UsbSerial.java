@@ -18,6 +18,7 @@ import java.util.Base64;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.Error;
 import java.lang.reflect.Constructor;
@@ -72,10 +73,10 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     // USB permission broadcastreceiver
     private final Handler mainLooper;
 
-    private final byte[][] dataBuffer = new byte[1][];
-    private int dataBufferSize = 0;
-    private boolean isDataPending = false;
-    private Runnable flushDataRunnable;
+    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    private final Object bufferLock = new Object();
+    private final Runnable flushRunnable = this::flushPendingData;
+    private volatile boolean flushScheduled = false;
 
 public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         super();
@@ -135,7 +136,7 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             usbIoManager.stop();
             usbIoManager = null;
         }
-        mainLooper.removeCallbacks(flushDataRunnable);
+        mainLooper.removeCallbacks(flushRunnable);
         flushPendingData();
         usbPermission = UsbPermission.Unknown;
         try {
@@ -335,60 +336,82 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
 
     private void updateReceivedData(byte[] data) {
         try {
-            synchronized (dataBuffer) {
-                if (dataBuffer[0] == null) {
-                    dataBuffer[0] = new byte[config.dataBufferSize];
+            synchronized (bufferLock) {
+                if (data == null || data.length == 0) {
+                    return;
                 }
 
-                int newSize = dataBufferSize + data.length;
+                if (buffer.size() + data.length >= config.dataBufferSize) {
+                    buffer.write(data, 0, data.length);
+                    flushInternalLocked();
+                    return;
+                }
 
-                if (newSize >= config.dataBufferSize) {
-                    flushPendingData();
-                    dataBuffer[0] = Arrays.copyOf(data, Math.min(data.length, config.dataBufferSize));
-                    dataBufferSize = Math.min(data.length, config.dataBufferSize);
+                buffer.write(data, 0, data.length);
+
+                if (flushScheduled) {
+                    mainLooper.removeCallbacks(flushRunnable);
                 } else {
-                    System.arraycopy(data, 0, dataBuffer[0], dataBufferSize, data.length);
-                    dataBufferSize = newSize;
+                    flushScheduled = true;
                 }
-
-                if (!isDataPending) {
-                    isDataPending = true;
-                    if (flushDataRunnable == null) {
-                        flushDataRunnable = this::flushPendingData;
-                    }
-                    mainLooper.postDelayed(flushDataRunnable, config.dataThrottleMs);
-                } else {
-                    mainLooper.removeCallbacks(flushDataRunnable);
-                    mainLooper.postDelayed(flushDataRunnable, config.dataThrottleMs);
-                }
+                mainLooper.postDelayed(flushRunnable, config.dataThrottleMs);
             }
-        } catch (Exception exception) {
-            updateReadDataError(exception);
+        } catch (Exception e) {
+            updateReadDataError(e);
         }
     }
 
     private void flushPendingData() {
-        synchronized (dataBuffer) {
-            if (dataBufferSize > 0) {
-                try {
-                    String receivedData;
-                    if (config.useBase64Encoding) {
-                        receivedData = Base64.getEncoder().encodeToString(Arrays.copyOf(dataBuffer[0], dataBufferSize));
-                    } else {
-                        receivedData = new String(dataBuffer[0], 0, dataBufferSize, StandardCharsets.UTF_8);
-                    }
-                    callback.receivedData(receivedData);
-                } catch (Exception exception) {
-                    updateReadDataError(exception);
+        try {
+            byte[] toSend;
+            synchronized (bufferLock) {
+                if (buffer.size() == 0) {
+                    flushScheduled = false;
+                    return;
                 }
+                toSend = buffer.toByteArray();
+                buffer.reset();
+                flushScheduled = false;
             }
-            dataBufferSize = 0;
-            isDataPending = false;
+            sendEncodedAndCatch(toSend);
+        } catch (Exception e) {
+            updateReadDataError(e);
+        }
+    }
+
+    private void flushInternalLocked() {
+                try {
+            if (buffer.size() == 0)
+                return;
+            byte[] toSend = buffer.toByteArray();
+            buffer.reset();
+            flushScheduled = false;
+            sendEncodedAndCatch(toSend);
+        } catch (Exception e) {
+            updateReadDataError(e);
+        }
+    }
+
+    private void sendEncodedAndCatch(byte[] raw) {
+        try {
+            String payload;
+                    if (config.useBase64Encoding) {
+                payload = Base64.getEncoder().encodeToString(raw);
+                    } else {
+                payload = new String(raw, 0, raw.length, StandardCharsets.UTF_8);
+                    }
+            callback.receivedData(payload);
+        } catch (Exception e) {
+            updateReadDataError(e);
         }
     }
 
     private void updateReadDataError(Exception exception) {
+        try {
         callback.error(new Error(exception.getMessage(), exception.getCause()));
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     UsbSerialDriver getDriverClass(final UsbDevice usbDevice) {
