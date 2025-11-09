@@ -1,3 +1,9 @@
+#### 1.1.0 (2025-11-09)
+
+##### New Features
+
+- Add getDataEncoding method to UsbSerialPlugin for retrieving current data encoding configuration ([8d7c6131](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/8d7c61312805432acf4d279aac408423dc72722f))
+
 #### 1.0.0 (2025-11-08)
 
 ##### Build System / Dependencies
