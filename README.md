@@ -75,6 +75,7 @@ export default config;
 * [`addListener('detached', ...)`](#addlistenerdetached-)
 * [`addListener('data', ...)`](#addlistenerdata-)
 * [`addListener('error', ...)`](#addlistenererror-)
+* [`getDataEncoding()`](#getdataencoding)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 
@@ -254,6 +255,19 @@ Listen for error events from the serial communication.
 | **`listenerFunc`** | <code>(data: { error: string; }) =&gt; void</code> | - Callback function called when errors occur |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### getDataEncoding()
+
+```typescript
+getDataEncoding() => Promise<{ encoding: 'utf8' | 'base64'; }>
+```
+
+Get the current data encoding configuration.
+
+**Returns:** <code>Promise&lt;{ encoding: 'utf8' | 'base64'; }&gt;</code>
 
 --------------------
 
