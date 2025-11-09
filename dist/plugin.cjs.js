@@ -22,6 +22,9 @@ class UsbSerialWeb extends core.WebPlugin {
     writeSerial(options) {
         throw new Error('Method not implemented: ' + JSON.stringify(options));
     }
+    getDataEncoding() {
+        throw new Error('Method not implemented.');
+    }
     addListener(eventName, listenerFunc) {
         listenerFunc({});
         return Promise.reject(`Method '${eventName}' not implemented.`);

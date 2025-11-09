@@ -12,5 +12,8 @@ export declare class UsbSerialWeb extends WebPlugin implements UsbSerialPlugin {
     writeSerial(options: {
         data: string;
     }): Promise<void>;
+    getDataEncoding(): Promise<{
+        encoding: 'utf8' | 'base64';
+    }>;
     addListener(eventName: 'log' | 'connected' | 'attached' | 'detached' | 'data' | 'error', listenerFunc: (data: any) => void): any;
 }
