@@ -1,3 +1,14 @@
+#### 1.1.1 (2025-11-10)
+
+##### Bug Fixes
+
+*  Fix the issue that openSerial method resolves the promise before the permission is granted. ([52d48d86](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/52d48d86753c81e6362b05d4c5bcd0c129ae1107))
+*  Fix the issue that updateReceivedData method doesn't work correctly. ([19538a11](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/19538a115b6bb54e4d1574f1a8d09b12ed81c50a))
+
+##### Refactors
+
+*  Replace Error with Exception to let the caller handle the exception instead of crashing the app. ([2af13675](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/2af13675f08455157e43391914450b3325ef20be))
+
 #### 1.1.0 (2025-11-09)
 
 ##### New Features
