@@ -11,6 +11,34 @@ npm install capacitor-serial-plugin
 npx cap sync
 ```
 
+## Android
+
+### `build.gradle`
+
+This plugin uses `usb-serial-for-android` library. You need to add the maven repository to your `build.gradle` file.
+
+```gradle
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+### `AndroidManifest.xml`
+
+This plugin requires the following feature:
+
+```xml
+<manifest ...>
+    <uses-feature android:name="android.hardware.usb.host" />
+    ...
+</manifest>
+```
+See the [Android Documentation](https://developer.android.com/develop/connectivity/usb/host) for more information.
+
 ## Configuration
 
 <docgen-config>
@@ -64,20 +92,30 @@ export default config;
 
 <docgen-index>
 
-* [`connectedDevices()`](#connecteddevices)
-* [`openSerial(...)`](#openserial)
-* [`closeSerial()`](#closeserial)
-* [`readSerial()`](#readserial)
-* [`writeSerial(...)`](#writeserial)
-* [`addListener('log', ...)`](#addlistenerlog-)
-* [`addListener('connected', ...)`](#addlistenerconnected-)
-* [`addListener('attached', ...)`](#addlistenerattached-)
-* [`addListener('detached', ...)`](#addlistenerdetached-)
-* [`addListener('data', ...)`](#addlistenerdata-)
-* [`addListener('error', ...)`](#addlistenererror-)
-* [`getDataEncoding()`](#getdataencoding)
-* [`removeAllListeners()`](#removealllisteners)
-* [Interfaces](#interfaces)
+- [Install](#install)
+- [Android](#android)
+  - [`build.gradle`](#buildgradle)
+  - [`AndroidManifest.xml`](#androidmanifestxml)
+- [Configuration](#configuration)
+  - [Examples](#examples)
+- [API](#api)
+  - [connectedDevices()](#connecteddevices)
+  - [openSerial(...)](#openserial)
+  - [closeSerial()](#closeserial)
+  - [readSerial()](#readserial)
+  - [writeSerial(...)](#writeserial)
+  - [addListener('log', ...)](#addlistenerlog-)
+  - [addListener('connected', ...)](#addlistenerconnected-)
+  - [addListener('attached', ...)](#addlistenerattached-)
+  - [addListener('detached', ...)](#addlistenerdetached-)
+  - [addListener('data', ...)](#addlistenerdata-)
+  - [addListener('error', ...)](#addlistenererror-)
+  - [getDataEncoding()](#getdataencoding)
+  - [removeAllListeners()](#removealllisteners)
+  - [Interfaces](#interfaces)
+    - [UsbSerialDevice](#usbserialdevice)
+    - [UsbSerialOptions](#usbserialoptions)
+    - [PluginListenerHandle](#pluginlistenerhandle)
 
 </docgen-index>
 
