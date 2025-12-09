@@ -177,12 +177,22 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             Intent intent = new Intent(USB_PERMISSION);
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);
 
-            PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(
+            final PendingIntent usbPermissionIntent;
+            // Targeting S+ (version 31 and above) requires that one of FLAG_IMMUTABLE or
+            // FLAG_MUTABLE be specified when creating a PendingIntent.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                usbPermissionIntent = PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            } else {
+                usbPermissionIntent = PendingIntent.getBroadcast(
                 context,
                 0,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-            );
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+            }
 
             BroadcastReceiver permissionReceiver = new BroadcastReceiver() {
                 @Override
