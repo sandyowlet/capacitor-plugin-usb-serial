@@ -121,17 +121,17 @@ public class UsbSerialPlugin extends Plugin implements Callback {
         }
     }
 
-//    @Override
-//    protected void handleOnResume() {
-//        super.handleOnResume();
-//        implementation.onResume();
-//    }
-//
-//    @Override
-//    protected void handleOnPause() {
-//        implementation.onPause();
-//        super.handleOnPause();
-//    }
+    // @Override
+    // protected void handleOnResume() {
+    // super.handleOnResume();
+    // implementation.onResume();
+    // }
+    //
+    // @Override
+    // protected void handleOnPause() {
+    // implementation.onPause();
+    // super.handleOnPause();
+    // }
 
     @Override
     public void log(String TAG, String text) {

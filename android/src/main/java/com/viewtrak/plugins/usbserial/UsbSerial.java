@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.Error;
+// import java.lang.Error;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -49,21 +49,23 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     private final UsbSerialConfig config;
 
     // activity reference from UsbSerialPlugin
-//    private AppCompatActivity mActivity;
+    // private AppCompatActivity mActivity;
     // call that will have data to open connection
-//    private PluginCall openSerialCall;
+    // private PluginCall openSerialCall;
 
     // usb permission tag name
     public static final String USB_PERMISSION = "com.viewtrak.plugins.usbserial.USB_PERMISSION";
     private static final int WRITE_WAIT_MILLIS = 2000;
     private static final int READ_WAIT_MILLIS = 2000;
 
-    private enum UsbPermission {Unknown, Requested, Granted, Denied}
+    private enum UsbPermission {
+        Unknown, Requested, Granted, Denied
+    }
 
     // logging tag
-//    private final String TAG = UsbSerial.class.getSimpleName();
+    // private final String TAG = UsbSerial.class.getSimpleName();
 
-    //    private boolean sleepOnPause;
+    // private boolean sleepOnPause;
     // I/O manager to handle new incoming serial data
     private SerialInputOutputManager usbIoManager;
     // Default Usb permission state
@@ -71,7 +73,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     // The serial port that will be used in this plugin
     private UsbSerialPort usbSerialPort;
     // Usb serial port connection status
-//    private boolean connected = false;
+    // private boolean connected = false;
     UsbDevice connectedDevice;
     // USB permission broadcastreceiver
     private final Handler mainLooper;
@@ -81,7 +83,7 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
     private final Runnable flushRunnable = this::flushPendingData;
     private volatile boolean flushScheduled = false;
 
-public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
+    public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         super();
         this.context = context;
         this.callback = callback;
@@ -188,9 +190,9 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
                         PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
                 usbPermissionIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                    intent,
+                        context,
+                        0,
+                        intent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
             }
 
@@ -215,8 +217,8 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
             };
 
             context.registerReceiver(permissionReceiver,
-                                   new IntentFilter(USB_PERMISSION),
-                                   RECEIVER_EXPORTED);
+                    new IntentFilter(USB_PERMISSION),
+                    RECEIVER_EXPORTED);
 
             usbManager.requestPermission(device, usbPermissionIntent);
 
@@ -247,16 +249,16 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         usbSerialPort.open(usbConnection);
         usbSerialPort.setParameters(settings.baudRate, settings.dataBits, settings.stopBits, settings.parity);
 
-        if (settings.dtr) usbSerialPort.setDTR(true);
-        if (settings.rts) usbSerialPort.setRTS(true);
+        if (settings.dtr)
+            usbSerialPort.setDTR(true);
+        if (settings.rts)
+            usbSerialPort.setRTS(true);
 
         usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
         usbIoManager.start();
 
         setConnectedDevice(driver.getDevice());
     }
-
-
 
     public void openSerial(UsbSerialOptions settings) throws Exception {
         try {
@@ -313,7 +315,8 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
                 return new String(data, StandardCharsets.UTF_8);
             }
         } catch (IOException e) {
-            // when using read with timeout, USB bulkTransfer returns -1 on timeout _and_ errors
+            // when using read with timeout, USB bulkTransfer returns -1 on timeout _and_
+            // errors
             // like connection loss, so there is typically no exception thrown here on error
             closeSerial();
             throw new Exception("connection lost: " + e.getMessage());
@@ -336,22 +339,21 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         }
     }
 
-
-//    void onResume() {
-//        if (sleepOnPause) {
-//            if (usbPermission == UsbPermission.Unknown || usbPermission == UsbPermission.Granted)
-//                mainLooper.post(() -> {
-//                    openSerial(this.openSerialCall);
-//                });
-//        }
-//    }
-//
-//    void onPause() {
-//        if (connected && sleepOnPause) {
-//            disconnect();
-//        }
-//    }
-
+    // void onResume() {
+    // if (sleepOnPause) {
+    // if (usbPermission == UsbPermission.Unknown || usbPermission ==
+    // UsbPermission.Granted)
+    // mainLooper.post(() -> {
+    // openSerial(this.openSerialCall);
+    // });
+    // }
+    // }
+    //
+    // void onPause() {
+    // if (connected && sleepOnPause) {
+    // disconnect();
+    // }
+    // }
 
     private void updateReceivedData(byte[] data) {
         try {
@@ -478,19 +480,17 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
                     || (vid == 1003 && pid == 8260)
                     || (vid == 7855 && pid == 4)
                     || (vid == 3368 && pid == 516)
-                    || (vid == 1155 && pid == 22336)
-            )
+                    || (vid == 1155 && pid == 22336))
                 driverClass = CdcAcmSerialDriver.class;
         }
 
         if (driverClass != null) {
             final UsbSerialDriver driver;
             try {
-                final Constructor<? extends UsbSerialDriver> ctor =
-                        driverClass.getConstructor(UsbDevice.class);
+                final Constructor<? extends UsbSerialDriver> ctor = driverClass.getConstructor(UsbDevice.class);
                 driver = ctor.newInstance(usbDevice);
-            } catch (NoSuchMethodException | IllegalArgumentException | InstantiationException |
-                    IllegalAccessException | InvocationTargetException e) {
+            } catch (NoSuchMethodException | IllegalArgumentException | InstantiationException | IllegalAccessException
+                    | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
             return driver;
@@ -510,7 +510,8 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         customTable.addProduct(1027, 24597, FtdiSerialDriver.class); // 0x6015: FT230X, FT231X, FT234XD
 
         // 0x10C4 / 0xEA??: Silabs CP210x
-        customTable.addProduct(4292, 60000, Cp21xxSerialDriver.class); // 0xea60: CP2102 and other CP210x single port devices
+        customTable.addProduct(4292, 60000, Cp21xxSerialDriver.class); // 0xea60: CP2102 and other CP210x single port
+                                                                       // devices
         customTable.addProduct(4292, 60016, Cp21xxSerialDriver.class); // 0xea70: CP2105
         customTable.addProduct(4292, 60017, Cp21xxSerialDriver.class); // 0xea71: CP2108
 
@@ -528,7 +529,7 @@ public UsbSerial(Context context, Callback callback, UsbSerialConfig config) {
         customTable.addProduct(6790, 29987, Ch34xSerialDriver.class); // 0x7523: CH340
 
         // CDC driver
-        // customTable.addProduct(9025,      , driver)  // 0x2341 / ......: Arduino
+        // customTable.addProduct(9025, , driver) // 0x2341 / ......: Arduino
         customTable.addProduct(5824, 1155, CdcAcmSerialDriver.class); // 0x16C0 / 0x0483: Teensyduino
         customTable.addProduct(1003, 8260, CdcAcmSerialDriver.class); // 0x03EB / 0x2044: Atmel Lufa
         customTable.addProduct(7855, 4, CdcAcmSerialDriver.class); // 0x1eaf / 0x0004: Leaflabs Maple
