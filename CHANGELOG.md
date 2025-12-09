@@ -1,3 +1,13 @@
+#### 1.1.2 (2025-12-09)
+
+##### Documentation Changes
+
+*  Update README.md to include Android setup instructions ([6c6f8627](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/6c6f862713438e4f34c3689c20131087a6dce9da))
+
+##### Bug Fixes
+
+*  Update PendingIntent creation to comply with Android S+ requirements for USB permission handling ([e19a84ba](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/e19a84ba878b325eb6c8ea4356d1f6f9ac024ab0))
+
 #### 1.1.1 (2025-11-10)
 
 ##### Bug Fixes
