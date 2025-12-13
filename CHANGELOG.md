@@ -1,3 +1,9 @@
+#### 1.1.3 (2025-12-13)
+
+##### Bug Fixes
+
+*  Add package name to PendingIntent for USB permission intent to ensure compatibility with Android S+ ([862e0f75](https://github.com/sandyowlet/capacitor-plugin-usb-serial/commit/862e0f75ef87ffd4be7466917d3af948aee6da8f))
+
 #### 1.1.2 (2025-12-09)
 
 ##### Documentation Changes
