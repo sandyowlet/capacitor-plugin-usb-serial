@@ -12,6 +12,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Build;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-// import java.lang.Error;
+import java.lang.Error;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -178,10 +179,9 @@ public class UsbSerial implements SerialInputOutputManager.Listener {
 
             Intent intent = new Intent(USB_PERMISSION);
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            intent.setPackage(context.getPackageName());
 
             final PendingIntent usbPermissionIntent;
-            // Targeting S+ (version 31 and above) requires that one of FLAG_IMMUTABLE or
-            // FLAG_MUTABLE be specified when creating a PendingIntent.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 usbPermissionIntent = PendingIntent.getBroadcast(
                         context,
